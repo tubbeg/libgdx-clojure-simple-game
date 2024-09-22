@@ -1,7 +1,7 @@
 (ns launcher.core
   (:import [com.badlogic.gdx.backends.lwjgl3
             Lwjgl3ApplicationConfiguration Lwjgl3Application]
-           [libgdx.adapter AppAdapt]))
+           [libgdx.adapter ExtendedAppAdapt]))
 
 
 (defn get-display-mode []
@@ -22,7 +22,7 @@
      )))
 
 (defn launch-application []
-  (let [app (new AppAdapt)
+  (let [app (new ExtendedAppAdapt)
         config (create-config)]
    (new Lwjgl3Application app config)))
 

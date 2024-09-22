@@ -1,1 +1,0 @@
-Put your libgdx.png file in this directory!

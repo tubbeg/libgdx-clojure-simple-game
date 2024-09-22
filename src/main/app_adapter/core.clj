@@ -3,7 +3,7 @@
            [com.badlogic.gdx.graphics.g2d SpriteBatch])
   (:require [util.core :as util])
   (:gen-class
-   :name libgdx.adapter.AppAdapt
+   :name libgdx.adapter.ExtendedAppAdapt
    :extends com.badlogic.gdx.ApplicationAdapter
    :init init
    :state state
@@ -16,23 +16,14 @@
 (defn get-state-deref [t]
   (-> (.state t) (deref)))
 
-(defn print-err
-  "Remove this!"
-  []
-  (println "Just in case if you are wondering why the
-            program is crashing.")
-  (println "It's because you are missing libgdx.png
-            in your assets directory"))
-
-(def text-path "libgdx.png")
+(def image-path "hello_world.png")
 
 (defn -init []
   [[] (atom {})])
 
 (defn -create [this]
-  (print-err)
   (let [s (.state this)
-        t (new Texture text-path)
+        t (new Texture image-path)
         b (new SpriteBatch)
         m {:sprite b :texture t}]
     (swap! s (fn [_] m))))
