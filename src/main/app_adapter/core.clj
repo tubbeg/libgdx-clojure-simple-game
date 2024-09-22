@@ -1,7 +1,7 @@
 (ns app-adapter.core
   (:import [com.badlogic.gdx.graphics Texture]
-           [com.badlogic.gdx.graphics.g2d SpriteBatch]
-           [com.badlogic.gdx.utils ScreenUtils])
+           [com.badlogic.gdx.graphics.g2d SpriteBatch])
+  (:require [util.core :as util])
   (:gen-class
    :name libgdx.adapter.AppAdapt
    :extends com.badlogic.gdx.ApplicationAdapter
@@ -13,17 +13,16 @@
   (. sb dispose)
   (. txt dispose))
 
-(defn get-state [t]
-  (.state t))
-
 (defn get-state-deref [t]
-  (-> t (get-state) (deref)))
+  (-> (.state t) (deref)))
 
-(defn clear-screen []
-  (let [f1 (float 0.15)
-        f3 (float 0.2)
-        f4 (float 1)]
-   (. ScreenUtils clear f1 f1 f3 f4)))
+(defn print-err
+  "Remove this!"
+  []
+  (println "Just in case if you are wondering why the
+            program is crashing.")
+  (println "It's because you are missing libgdx.png
+            in your assets directory"))
 
 (def text-path "libgdx.png")
 
@@ -31,18 +30,18 @@
   [[] (atom {})])
 
 (defn -create [this]
-  (let [s (get-state this)
+  (print-err)
+  (let [s (.state this)
         t (new Texture text-path)
         b (new SpriteBatch)
         m {:sprite b :texture t}]
     (swap! s (fn [_] m))))
 
-
 (defn -render [this]
   (let [s (get-state-deref this)
         sprite (:sprite s)
         texture (:texture s)]
-    (clear-screen)
+    (util/clear-screen)
     (doto sprite
       (.begin)
       (.draw texture (float 140) (float 210))
