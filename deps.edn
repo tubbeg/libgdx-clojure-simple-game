@@ -1,0 +1,5 @@
+{:paths ["src/main" "classes" "assets"]
+ :deps {com.badlogicgames.gdx/gdx  {:mvn/version "1.12.1"}
+        com.badlogicgames.gdx/gdx-platform$natives-desktop  {:mvn/version "1.12.1"}
+        com.badlogicgames.gdx/gdx-backend-lwjgl3  {:mvn/version "1.12.1"}}
+ }
