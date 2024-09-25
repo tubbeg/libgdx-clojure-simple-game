@@ -1,21 +1,7 @@
 (ns launcher.core
   (:import [com.badlogic.gdx.backends.lwjgl3
-            Lwjgl3ApplicationConfiguration Lwjgl3Application]
-           [libgdx.adapter ExtendedAppAdapt])
+            Lwjgl3ApplicationConfiguration Lwjgl3Application])
   (:require [app-listener.core :as listener]))
-
-(comment
-  "There's two ways of running a libgdx app via Clojure:
-   
-   * Extend ApplicationAdapter via :gen-class
-   * reify ApplicationListener"
-  )
-
-(def test-reify? true)
-(def app
-  (if test-reify?
-    listener/app-adapter
-    (new ExtendedAppAdapt)))
 
 (defn get-display-mode []
   (. Lwjgl3ApplicationConfiguration getDisplayMode))
@@ -38,4 +24,4 @@
   (->> (create-config) 
        (new Lwjgl3Application application)))
 
-(launch-application app)
+(launch-application listener/app-adapter)

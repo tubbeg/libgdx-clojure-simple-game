@@ -1,57 +1,61 @@
 (ns app-listener.core
   (:import [com.badlogic.gdx ApplicationListener]
-           [com.badlogic.gdx.graphics.g2d SpriteBatch]
-           [com.badlogic.gdx.graphics Texture])
-  (:require [util.core :as util]))
+           [com.badlogic.gdx.graphics.g2d SpriteBatch Sprite]
+           [com.badlogic.gdx.graphics Texture]
+           [com.badlogic.gdx Gdx Input]
+           [com.badlogic.gdx.utils.viewport FitViewport])
+  (:require [util.core :as u]
+            [app-listener.input.core :as i]
+            [app-listener.logic.core :as l]
+            [app-listener.draw.core :as d]
+            [util.core :as util]))
 
+(def background "background.png")
+(def bucket "bucket.png")
+(def drop-mp3 "drop.mp3")
+(def drop-img "drop.png")
+(def music-path "music.mp3")
 
-
-(comment
-  "libGDX has a design flaw which is the Gdx state.
-   It is defined in the com.badlogic.gdx.Gdx package.
-   
-   It's essentially a global variable.
-   
-   Some classes, like the Texture will fail during
-   its constructor if the global variable has the wrong
-   state.
-
-   As a rule of thumb, your classes should never throw an
-   exception in its constructor. The constructor should
-   behave almost like an atom. 
-
-   And using global variables is generally speaking a
-   bad idea.
-
-   The GDX state is why we can't initialize Textures without
-   implementing applicationlistener. This makes it harder
-   to test the application.
-   "
-  )
-
-(def image-path "hello_world.png")
+(defn create-state [sb s vp b d ba mu so dr t]
+  {:sb sb
+   :sprite s
+   :drops dr
+   :viewport vp
+   :bucket b
+   :drop d
+   :background ba
+   :music mu
+   :sound so
+   :timer t})
 
 (defn create-props [state]
-  (let [t (new Texture image-path)
-        b (new SpriteBatch)]
-    (swap! state (fn [_] {:sprite b :texture t}))))
+  (let [b (new Texture bucket)
+        d (new Texture drop-img)
+        ba (new Texture background)
+        mu (u/create-music music-path)
+        so (u/create-sound drop-mp3)
+        vp (new FitViewport 8 5)
+        s (u/make-sprite b 1 1)
+        sb (new SpriteBatch)
+        dr (-> [] (l/create-droplet vp d))
+        t (float 0)
+        m (create-state sb s vp b d ba mu so dr t)]
+    (swap! state (fn [_] m))))
 
-(defn render-image [state]
-  (let [s (:sprite @state)
-        t (:texture @state)
-        f1 (float 140)
-        f2 (float 210)]
-    (util/clear-screen)
-    (doto s
-      (.begin)
-      (.draw t f1 f2)
-      (.end))))
+(comment(defn print-drops [state]
+  (let [drops-nr (-> state (deref) (:drops) (count))]
+    (println drops-nr)))
+)
+(defn render-scene [state] 
+  (i/input state)
+  (l/logic state)
+  (d/draw state))
 
-(defn dispose-sprite-texture [state]
-  (let [s (:sprite @state)
-        t (:texture @state)]
-    (.dispose s)
-    (.dispose t)))
+(defn resize-viewport [state w h]
+  (let [v (u/get-viewport state)]
+    (doto v
+      (.update w h true))))
+
 
 ; Implementing the ApplicationListener Java interface
 (def app-adapter
@@ -59,10 +63,10 @@
    (reify ApplicationListener
      (create [this]
        (create-props state))
-     (resize [this width height])
+     (resize [this width height]
+       (resize-viewport state width height))
      (render [this]
-       (render-image state))
+       (render-scene state))
      (pause [this])
      (resume [this])
-     (dispose [this]
-       (dispose-sprite-texture state)))))
+     (dispose [this]))))
