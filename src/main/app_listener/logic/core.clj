@@ -1,7 +1,8 @@
 (ns app-listener.logic.core
-  (:import [com.badlogic.gdx.math MathUtils]
+  (:import [com.badlogic.gdx.math MathUtils Rectangle]
            [com.badlogic.gdx.graphics.g2d Sprite])
-  (:require [util.core :as u]))
+  (:require [util.core :as u]
+            [app-listener.logic.time.core :as t]))
 
 (defn create-droplet [dr vp txt]
   (let [[vph vpw] (u/viewport-get-h-w vp)
@@ -68,24 +69,33 @@
         m (assoc @state :drops flter)] 
     (swap! state (fn [_] m))))
 
-(defn fix-time [state]
-  (let [t (-> state (deref) (:timer))
-        d (u/get-delta-time)
-        s (+ d t)]
-    (if (> s (float 1)) (float 0) s)))
+(defn no-collision? [bucket-rect droplet]
+  (let [[x y] (u/sprite-get-x-y droplet)
+        [h w] (u/sprite-get-h-w droplet)
+        drop-rect (doto (new Rectangle)
+                    (.set x y h w))]
+    (-> drop-rect
+        (.overlaps bucket-rect)
+        (not))))
 
-(defn swap-time! [state]
-  (let [t (fix-time state)
-        m (assoc @state :timer t)]
+(defn remove-at-collision! [state]
+  (let [s @state
+        b (:sprite s)
+        dr (:drops s)
+        [x y] (u/sprite-get-x-y b)
+        [h w] (u/sprite-get-h-w b)
+        brect (doto (new Rectangle)
+                (.set x y h w))
+        flter (-> #(no-collision? brect %)
+                  (filter dr))
+        m (assoc s :drops flter)]
     (swap! state (fn [_] m))))
 
-(defn time? [state]
-  (-> state (deref) (:timer) (= (float 0))))
-
 (defn logic [state]
-  (swap-time! state) 
-  (when (time? state)
+  (t/swap-time! state) 
+  (when (t/time? state)
     (add-new-drop-to-state! state))
   (remove-droplets! state)
+  (remove-at-collision! state)
   (clamp-sprite-x state)
   (move-droplets state))

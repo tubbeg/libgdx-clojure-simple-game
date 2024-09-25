@@ -21,8 +21,14 @@
 )
 
 (defn sprite-set-x [sprite x]
-   (doto sprite
-     (.setX x)))
+  (doto sprite
+    (.setX x)))
+
+(defn sprite-get-x-y [sprite]
+  [(.getX sprite) (.getY sprite)])
+
+(defn sprite-get-h-w [sprite]
+  [(.getHeight sprite) (.getWidth sprite)])
 
 (defn sprite-translate-y [sprite y]
   (->> y (float) (.translateY sprite)))
