@@ -28,11 +28,17 @@
    :sound so
    :timer t})
 
+(defn create-music [p]
+  (doto (u/create-music p)
+    (.setLooping true)
+    (.setVolume (-> 1 (/ 2) (float)))
+    (.play)))
+
 (defn create-props [state]
   (let [b (new Texture bucket)
         d (new Texture drop-img)
         ba (new Texture background)
-        mu (u/create-music music-path)
+        mu (create-music music-path)
         so (u/create-sound drop-mp3)
         vp (new FitViewport 8 5)
         s (u/make-sprite b 1 1)

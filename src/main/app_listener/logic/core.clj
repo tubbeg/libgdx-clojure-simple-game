@@ -69,24 +69,35 @@
         m (assoc @state :drops flter)] 
     (swap! state (fn [_] m))))
 
-(defn no-collision? [bucket-rect droplet]
+(comment
+  "This is not a perfect implementation. There
+   are many better ways to do his. Sound has
+   to play on every collision and it should be
+   handled in another function. Also an Entity
+   Component System might solve this differently")
+
+(defn no-collision? [bucket-rect droplet m]
   (let [[x y] (u/sprite-get-x-y droplet)
         [h w] (u/sprite-get-h-w droplet)
         drop-rect (doto (new Rectangle)
-                    (.set x y h w))]
-    (-> drop-rect
-        (.overlaps bucket-rect)
-        (not))))
+                    (.set x y h w))
+        nocoll? (-> drop-rect
+                     (.overlaps bucket-rect)
+                     (not))]
+    (when (not nocoll?)
+      (.play m))
+    nocoll?))
 
 (defn remove-at-collision! [state]
-  (let [s @state
+  (let [s @state 
+        sound (:sound s)
         b (:sprite s)
         dr (:drops s)
         [x y] (u/sprite-get-x-y b)
         [h w] (u/sprite-get-h-w b)
         brect (doto (new Rectangle)
                 (.set x y h w))
-        flter (-> #(no-collision? brect %)
+        flter (-> #(no-collision? brect % sound)
                   (filter dr))
         m (assoc s :drops flter)]
     (swap! state (fn [_] m))))
